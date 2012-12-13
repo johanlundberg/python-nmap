@@ -319,6 +319,10 @@ class PortScanner(object):
                 # status : up...
                 scan_result['scan'][host]['status'] = {'state': dstatus.getAttributeNode('state').value,
                                                'reason': dstatus.getAttributeNode('reason').value}
+            for dstatus in dhost.getElementsByTagName('uptime'):
+                # uptime : seconds, lastboot
+                scan_result['scan'][host]['uptime'] = {'seconds': dstatus.getAttributeNode('seconds').value,
+                                                'lastboot': dstatus.getAttributeNode('lastboot').value}
             for dport in dhost.getElementsByTagName('port'):
                 # protocol
                 proto = dport.getAttributeNode('protocol').value
@@ -328,16 +332,28 @@ class PortScanner(object):
                 state = dport.getElementsByTagName('state')[0].getAttributeNode('state').value
                 # reason
                 reason = dport.getElementsByTagName('state')[0].getAttributeNode('reason').value
-                # name if any
-                name = ''
+                # name, product, version, extra info and conf if any
+                name,product,version,extrainfo,conf = '','','','',''
                 for dname in dport.getElementsByTagName('service'):
                     name = dname.getAttributeNode('name').value
+                    if dname.hasAttribute('product'):
+                        product = dname.getAttributeNode('product').value
+                    if dname.hasAttribute('version'):
+                        version = dname.getAttributeNode('version').value
+                    if dname.hasAttribute('extrainfo'):
+                        extrainfo = dname.getAttributeNode('extrainfo').value
+                    if dname.hasAttribute('conf'):
+                        conf = dname.getAttributeNode('conf').value
                 # store everything
                 if not proto in list(scan_result['scan'][host].keys()):
                     scan_result['scan'][host][proto] = {}
                 scan_result['scan'][host][proto][port] = {'state': state,
                                                   'reason': reason,
-                                                  'name': name}
+                                                  'name': name,
+                                                  'product': product,
+                                                  'version': version,
+                                                  'extrainfo': extrainfo,
+                                                  'conf': conf}
                 script_id = ''
                 script_out = ''
                 # get script output if any
@@ -605,13 +621,17 @@ class PortScannerHostDict(dict):
         """
         return self['hostname']
 
-
     def state(self):
         """
         returns host state
         """
         return self['status']['state']
 
+    def uptime(self):
+        """
+        returns host state
+        """
+        return self['uptime']
 
     def all_protocols(self):
         """
