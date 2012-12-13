@@ -1,0 +1,56 @@
+Changelog
+=========
+
+2012/11/23 (v0.2.5)
+ - corrected : Issue 2: "map.nmap.PortScannerError: 'nmap program was not found in path'" on CentOS
+ - corrected : Issue 3: nmap.scan() short-circuits prematurely
+
+2011/11/09 (v0.2.4)
+ - implemented a request from Santhosh Edukulla <santhosh.edukulla@gmail.com> :
+   parse OS scanning output
+ - Error with multiple host specifications :
+   bug and patch from old.schepperhand@gmail.com 
+
+2011/11/04
+ - bug in example.py : if no tcp port was open between 22-443
+
+2010/12/17 (v0.2.3)
+ - adding __get_last_online_version to check if current version is the last published
+
+2010/12/17 (v0.2.2)
+ - bug in handling nmap_error output (returned value was bin, string was expected)
+ - removed test strings form __init__.py file.
+
+2010/12/15 (v0.2.1)
+ - corrected bug in __init__.py about scope problem
+ - try to find nmap executable in known directories
+ - raise AssertionError when trying to call command_line, scaninfo, scanstats, has_host before scanning
+
+2010/12/14 (v0.2.0)
+ - Make python-nmap works with Python 3.x
+ - Contribution from Brian Bustin <brian at bustin.us>
+
+2010/06/07 (v0.1.4)
+Patches from Steve 'Ashcrow' Milner <steve at gnulinux.net>
+ - remove shebang from __init__.py as it is not a runnable script
+ - allow use with ALPHA and BETA nmap releases
+ - .has_key() is deprecated, replaced instances with in
+ - move to using the print function for python2 and 3 usage
+
+2010/06/04
+ - adding PortScanner.listscan
+ - PortScanner.scan now returns scan_result
+ - adding class PortScannerAsync (idea from Steve 'Ashcrow' Milner <steve at gnulinux.net>)
+
+2010/06/03
+ - Import on google code
+   svn checkout https://python-nmap.googlecode.com/svn/trunk/ python-nmap --username  XXXXX
+ - added PortScanner.scanstats method
+ - updated example.py and documentation for pingsweep
+ - updated Makefile for generating documentation
+
+2010/03/09
+ - Modified packaging. v0.1.1 [norman]
+
+2010/03/08
+ - Initial release. v0.1.0 [norman]

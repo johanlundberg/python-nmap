@@ -1,0 +1,430 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module nmap</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>nmap</strong></big></big> (version 0.2.4)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/xael/ESPACE_KM/python/python-nmap/nmap/nmap.py">/home/xael/ESPACE_KM/python/python-nmap/nmap/nmap.py</a></font></td></tr></table>
+    <p><tt>nmap.py&nbsp;-&nbsp;version&nbsp;and&nbsp;date,&nbsp;see&nbsp;below<br>
+&nbsp;<br>
+Author&nbsp;:&nbsp;Alexandre&nbsp;Norman&nbsp;-&nbsp;norman&nbsp;at&nbsp;xael.org<br>
+Contributors:&nbsp;Steve&nbsp;'Ashcrow'&nbsp;Milner&nbsp;-&nbsp;steve&nbsp;at&nbsp;gnulinux.net<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Brian&nbsp;Bustin&nbsp;-&nbsp;brian&nbsp;at&nbsp;bustin.us<br>
+Licence&nbsp;:&nbsp;GPL&nbsp;v3&nbsp;or&nbsp;any&nbsp;later&nbsp;version<br>
+&nbsp;<br>
+&nbsp;<br>
+This&nbsp;program&nbsp;is&nbsp;free&nbsp;software:&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and/or&nbsp;modify<br>
+it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;as&nbsp;published&nbsp;by<br>
+the&nbsp;Free&nbsp;Software&nbsp;Foundation,&nbsp;either&nbsp;version&nbsp;3&nbsp;of&nbsp;the&nbsp;License,&nbsp;or<br>
+any&nbsp;later&nbsp;version.<br>
+&nbsp;<br>
+This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,<br>
+but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of<br>
+MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the<br>
+GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.<br>
+&nbsp;<br>
+You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License<br>
+along&nbsp;with&nbsp;this&nbsp;program.&nbsp;&nbsp;If&nbsp;not,&nbsp;see&nbsp;&lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.<br>
+&nbsp;<br>
+&nbsp;<br>
+Test&nbsp;strings&nbsp;:<br>
+^^^^^^^^^^^^<br>
+&gt;&gt;&gt;&nbsp;import&nbsp;nmap<br>
+&gt;&gt;&gt;&nbsp;if&nbsp;__get_last_online_version()&nbsp;!=&nbsp;__version__:<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raise&nbsp;ValueError('Current&nbsp;version&nbsp;is&nbsp;{0}&nbsp;-&nbsp;Last&nbsp;published&nbsp;version&nbsp;is&nbsp;{1}'.format(__version__,&nbsp;__get_last_online_version()))<br>
+&gt;&gt;&gt;&nbsp;nm&nbsp;=&nbsp;nmap.<a href="#PortScanner">PortScanner</a>()<br>
+&gt;&gt;&gt;&nbsp;try:<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nm.scan(arguments='-wrongargs')<br>
+...&nbsp;except&nbsp;nmap.<a href="#PortScannerError">PortScannerError</a>:<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pass<br>
+&gt;&gt;&gt;&nbsp;r=nm.scan('127.0.0.1',&nbsp;'22-443')<br>
+&gt;&gt;&gt;&nbsp;nm.command_line()<br>
+'nmap&nbsp;-oX&nbsp;-&nbsp;-p&nbsp;22-443&nbsp;-sV&nbsp;127.0.0.1'<br>
+&gt;&gt;&gt;&nbsp;nm.scaninfo()<br>
+{'tcp':&nbsp;{'services':&nbsp;'22-443',&nbsp;'method':&nbsp;'connect'}}<br>
+&gt;&gt;&gt;&nbsp;nm.all_hosts()<br>
+['127.0.0.1']<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].hostname()<br>
+'localhost.localdomain'<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].state()<br>
+'up'<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].all_protocols()<br>
+['tcp']<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1']['tcp'].keys()<br>
+dict_keys([80,&nbsp;25,&nbsp;443,&nbsp;22,&nbsp;111])<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].has_tcp(22)<br>
+True<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].has_tcp(23)<br>
+False<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1']['tcp'][22]<br>
+{'state':&nbsp;'open',&nbsp;'reason':&nbsp;'syn-ack',&nbsp;'name':&nbsp;'ssh'}<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1'].tcp(22)<br>
+{'state':&nbsp;'open',&nbsp;'reason':&nbsp;'syn-ack',&nbsp;'name':&nbsp;'ssh'}<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1']['tcp'][22]['state']<br>
+'open'<br>
+&gt;&gt;&gt;&nbsp;nm.scanstats()['uphosts']<br>
+'1'<br>
+&gt;&gt;&gt;&nbsp;nm.scanstats()['downhosts']<br>
+'0'<br>
+&gt;&gt;&gt;&nbsp;nm.scanstats()['totalhosts']<br>
+'1'<br>
+&gt;&gt;&gt;&nbsp;'timestr'&nbsp;in&nbsp;nm.scanstats().keys()<br>
+True<br>
+&gt;&gt;&gt;&nbsp;'elapsed'&nbsp;in&nbsp;nm.scanstats().keys()<br>
+True<br>
+&gt;&gt;&gt;&nbsp;nm.listscan('192.168.1.0/30')<br>
+['192.168.1.0',&nbsp;'192.168.1.1',&nbsp;'192.168.1.2',&nbsp;'192.168.1.3']<br>
+&gt;&gt;&gt;&nbsp;nm.listscan('localhost/30')<br>
+['127.0.0.0',&nbsp;'127.0.0.1',&nbsp;'127.0.0.2',&nbsp;'127.0.0.3']<br>
+&gt;&gt;&gt;&nbsp;r=nm.scan('127.0.0.1',&nbsp;arguments='-O')<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1']['osclass']<br>
+[{'vendor':&nbsp;u'Linux',&nbsp;'osfamily':&nbsp;u'Linux',&nbsp;'type':&nbsp;u'general&nbsp;purpose',&nbsp;'osgen':&nbsp;u'2.6.X',&nbsp;'accuracy':&nbsp;u'98'},&nbsp;{'vendor':&nbsp;u'Netgear',&nbsp;'osfamily':&nbsp;u'embedded',&nbsp;'type':&nbsp;u'WAP',&nbsp;'osgen':&nbsp;'',&nbsp;'accuracy':&nbsp;''},&nbsp;{'vendor':&nbsp;u'Gemtek',&nbsp;'osfamily':&nbsp;u'embedded',&nbsp;'type':&nbsp;u'WAP',&nbsp;'osgen':&nbsp;'',&nbsp;'accuracy':&nbsp;''},&nbsp;{'vendor':&nbsp;u'Siemens',&nbsp;'osfamily':&nbsp;u'embedded',&nbsp;'type':&nbsp;u'WAP',&nbsp;'osgen':&nbsp;'',&nbsp;'accuracy':&nbsp;''},&nbsp;{'vendor':&nbsp;u'Linux',&nbsp;'osfamily':&nbsp;u'Linux',&nbsp;'type':&nbsp;u'general&nbsp;purpose',&nbsp;'osgen':&nbsp;u'2.4.X',&nbsp;'accuracy':&nbsp;u'90'},&nbsp;{'vendor':&nbsp;u'Linksys',&nbsp;'osfamily':&nbsp;u'embedded',&nbsp;'type':&nbsp;u'WAP',&nbsp;'osgen':&nbsp;'',&nbsp;'accuracy':&nbsp;''},&nbsp;{'vendor':&nbsp;u'Linux',&nbsp;'osfamily':&nbsp;u'Linux',&nbsp;'type':&nbsp;u'WAP',&nbsp;'osgen':&nbsp;u'2.4.X',&nbsp;'accuracy':&nbsp;u'90'},&nbsp;{'vendor':&nbsp;u'Nokia',&nbsp;'osfamily':&nbsp;u'Linux',&nbsp;'type':&nbsp;u'general&nbsp;purpose',&nbsp;'osgen':&nbsp;u'2.6.X',&nbsp;'accuracy':&nbsp;u'89'}]<br>
+&gt;&gt;&gt;&nbsp;nm['127.0.0.1']['fingerprint']<br>
+'OS:SCAN(V=5.50%D=11/9%OT=22%CT=1%CU=37937%PV=N%DS=0%DC=L%G=Y%TM=4EBAE79D%P=\nOS:i686-pc-linux-gnu)SEQ(SP=103%GCD=1%ISR=10D%TI=Z%CI=Z%II=I%TS=8)OPS(O1=M4\nOS:00CST11NW6%O2=M400CST11NW6%O3=M400CNNT11NW6%O4=M400CST11NW6%O5=M400CST11\nOS:NW6%O6=M400CST11)WIN(W1=8000%W2=8000%W3=8000%W4=8000%W5=8000%W6=8000)ECN\nOS:(R=Y%DF=Y%T=40%W=8018%O=M400CNNSNW6%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=\nOS:AS%RD=0%Q=)T2(R=N)T3(R=Y%DF=Y%T=40%W=8000%S=O%A=S+%F=AS%O=M400CST11NW6%R\nOS:D=0%Q=)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%\nOS:S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(\nOS:R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0\nOS:%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)\n'</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="collections.html">collections</a><br>
+<a href="os.html">os</a><br>
+<a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="shlex.html">shlex</a><br>
+<a href="string.html">string</a><br>
+<a href="subprocess.html">subprocess</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="types.html">types</a><br>
+<a href="xml.html">xml</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#Exception">builtins.Exception</a>(<a href="builtins.html#BaseException">builtins.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="nmap.html#PortScannerError">PortScannerError</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#dict">builtins.dict</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="nmap.html#PortScannerHostDict">PortScannerHostDict</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="nmap.html#PortScanner">PortScanner</a>
+</font></dt><dt><font face="helvetica, arial"><a href="nmap.html#PortScannerAsync">PortScannerAsync</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PortScanner">class <strong>PortScanner</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#PortScanner">PortScanner</a>&nbsp;allows&nbsp;to&nbsp;use&nbsp;nmap&nbsp;from&nbsp;python<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PortScanner-__getitem__"><strong>__getitem__</strong></a>(self, host)</dt><dd><tt>returns&nbsp;a&nbsp;host&nbsp;detail</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-__init__"><strong>__init__</strong></a>(self, nmap_search_path<font color="#909090">=('nmap', '/usr/bin/nmap', '/usr/local/bin/nmap', '/sw/bin/nmap', '/opt/local/bin/nmap')</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;module<br>
+detects&nbsp;nmap&nbsp;on&nbsp;the&nbsp;system&nbsp;and&nbsp;nmap&nbsp;version<br>
+may&nbsp;raise&nbsp;<a href="#PortScannerError">PortScannerError</a>&nbsp;exception&nbsp;if&nbsp;nmap&nbsp;is&nbsp;not&nbsp;found&nbsp;in&nbsp;the&nbsp;path<br>
+&nbsp;<br>
+nmap_search_path&nbsp;=&nbsp;tupple&nbsp;of&nbsp;string&nbsp;where&nbsp;to&nbsp;search&nbsp;for&nbsp;nmap&nbsp;executable.&nbsp;Change&nbsp;this&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;use&nbsp;a&nbsp;specific&nbsp;version&nbsp;of&nbsp;nmap.</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-all_hosts"><strong>all_hosts</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;sorted&nbsp;list&nbsp;of&nbsp;all&nbsp;hosts</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-command_line"><strong>command_line</strong></a>(self)</dt><dd><tt>returns&nbsp;command&nbsp;line&nbsp;used&nbsp;for&nbsp;the&nbsp;scan<br>
+&nbsp;<br>
+may&nbsp;raise&nbsp;AssertionError&nbsp;exception&nbsp;if&nbsp;called&nbsp;before&nbsp;scanning</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-get_nmap_last_output"><strong>get_nmap_last_output</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;last&nbsp;text&nbsp;output&nbsp;of&nbsp;nmap&nbsp;in&nbsp;raw&nbsp;text<br>
+this&nbsp;may&nbsp;be&nbsp;used&nbsp;for&nbsp;debugging&nbsp;purpose</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-has_host"><strong>has_host</strong></a>(self, host)</dt><dd><tt>returns&nbsp;True&nbsp;if&nbsp;host&nbsp;has&nbsp;result,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-listscan"><strong>listscan</strong></a>(self, hosts<font color="#909090">='127.0.0.1'</font>)</dt><dd><tt>do&nbsp;not&nbsp;scan&nbsp;but&nbsp;interpret&nbsp;target&nbsp;hosts&nbsp;and&nbsp;return&nbsp;a&nbsp;list&nbsp;a&nbsp;hosts</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-nmap_version"><strong>nmap_version</strong></a>(self)</dt><dd><tt>returns&nbsp;nmap&nbsp;version&nbsp;if&nbsp;detected&nbsp;(int&nbsp;version,&nbsp;int&nbsp;subversion)<br>
+or&nbsp;(0,&nbsp;0)&nbsp;if&nbsp;unknown</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-scan"><strong>scan</strong></a>(self, hosts<font color="#909090">='127.0.0.1'</font>, ports<font color="#909090">=None</font>, arguments<font color="#909090">='-sV'</font>)</dt><dd><tt>Scan&nbsp;given&nbsp;hosts<br>
+&nbsp;<br>
+May&nbsp;raise&nbsp;<a href="#PortScannerError">PortScannerError</a>&nbsp;exception&nbsp;if&nbsp;nmap&nbsp;output&nbsp;something&nbsp;on&nbsp;stderr<br>
+&nbsp;<br>
+hosts&nbsp;=&nbsp;string&nbsp;for&nbsp;hosts&nbsp;as&nbsp;nmap&nbsp;use&nbsp;it&nbsp;'scanme.nmap.org'&nbsp;or&nbsp;'198.116.0-255.1-127'&nbsp;or&nbsp;'216.163.128.20/20'<br>
+ports&nbsp;=&nbsp;string&nbsp;for&nbsp;ports&nbsp;as&nbsp;nmap&nbsp;use&nbsp;it&nbsp;'22,53,110,143-4564'<br>
+arguments&nbsp;=&nbsp;string&nbsp;of&nbsp;arguments&nbsp;for&nbsp;nmap&nbsp;'-sU&nbsp;-sX&nbsp;-sC'</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-scaninfo"><strong>scaninfo</strong></a>(self)</dt><dd><tt>returns&nbsp;scaninfo&nbsp;structure<br>
+{'tcp':&nbsp;{'services':&nbsp;'22',&nbsp;'method':&nbsp;'connect'}}<br>
+&nbsp;<br>
+may&nbsp;raise&nbsp;AssertionError&nbsp;exception&nbsp;if&nbsp;called&nbsp;before&nbsp;scanning</tt></dd></dl>
+
+<dl><dt><a name="PortScanner-scanstats"><strong>scanstats</strong></a>(self)</dt><dd><tt>returns&nbsp;scanstats&nbsp;structure<br>
+{'uphosts':&nbsp;'3',&nbsp;'timestr':&nbsp;'Thu&nbsp;Jun&nbsp;&nbsp;3&nbsp;21:45:07&nbsp;2010',&nbsp;'downhosts':&nbsp;'253',&nbsp;'totalhosts':&nbsp;'256',&nbsp;'elapsed':&nbsp;'5.79'}<br>
+&nbsp;<br>
+may&nbsp;raise&nbsp;AssertionError&nbsp;exception&nbsp;if&nbsp;called&nbsp;before&nbsp;scanning</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PortScannerAsync">class <strong>PortScannerAsync</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#PortScannerAsync">PortScannerAsync</a>&nbsp;allows&nbsp;to&nbsp;use&nbsp;nmap&nbsp;from&nbsp;python&nbsp;asynchronously<br>
+for&nbsp;each&nbsp;host&nbsp;scanned,&nbsp;callback&nbsp;is&nbsp;called&nbsp;with&nbsp;scan&nbsp;result&nbsp;for&nbsp;the&nbsp;host<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PortScannerAsync-__del__"><strong>__del__</strong></a>(self)</dt><dd><tt>Cleanup&nbsp;when&nbsp;deleted</tt></dd></dl>
+
+<dl><dt><a name="PortScannerAsync-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;the&nbsp;module<br>
+detects&nbsp;nmap&nbsp;on&nbsp;the&nbsp;system&nbsp;and&nbsp;nmap&nbsp;version<br>
+may&nbsp;raise&nbsp;<a href="#PortScannerError">PortScannerError</a>&nbsp;exception&nbsp;if&nbsp;nmap&nbsp;is&nbsp;not&nbsp;found&nbsp;in&nbsp;the&nbsp;path</tt></dd></dl>
+
+<dl><dt><a name="PortScannerAsync-scan"><strong>scan</strong></a>(self, hosts<font color="#909090">='127.0.0.1'</font>, ports<font color="#909090">=None</font>, arguments<font color="#909090">='-sV'</font>, callback<font color="#909090">=None</font>)</dt><dd><tt>Scan&nbsp;given&nbsp;hosts&nbsp;in&nbsp;a&nbsp;separate&nbsp;process&nbsp;and&nbsp;return&nbsp;host&nbsp;by&nbsp;host&nbsp;result&nbsp;using&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
+<a href="#PortScannerError">PortScannerError</a>&nbsp;exception&nbsp;from&nbsp;standard&nbsp;nmap&nbsp;is&nbsp;catched&nbsp;and&nbsp;you&nbsp;won't&nbsp;know&nbsp;about&nbsp;it<br>
+&nbsp;<br>
+hosts&nbsp;=&nbsp;string&nbsp;for&nbsp;hosts&nbsp;as&nbsp;nmap&nbsp;use&nbsp;it&nbsp;'scanme.nmap.org'&nbsp;or&nbsp;'198.116.0-255.1-127'&nbsp;or&nbsp;'216.163.128.20/20'<br>
+ports&nbsp;=&nbsp;string&nbsp;for&nbsp;ports&nbsp;as&nbsp;nmap&nbsp;use&nbsp;it&nbsp;'22,53,110,143-4564'<br>
+arguments&nbsp;=&nbsp;string&nbsp;of&nbsp;arguments&nbsp;for&nbsp;nmap&nbsp;'-sU&nbsp;-sX&nbsp;-sC'<br>
+callback&nbsp;=&nbsp;callback&nbsp;function&nbsp;which&nbsp;takes&nbsp;(host,&nbsp;scan_data)&nbsp;as&nbsp;arguments</tt></dd></dl>
+
+<dl><dt><a name="PortScannerAsync-still_scanning"><strong>still_scanning</strong></a>(self)</dt><dd><tt>Return&nbsp;True&nbsp;if&nbsp;a&nbsp;scan&nbsp;is&nbsp;currently&nbsp;running,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScannerAsync-stop"><strong>stop</strong></a>(self)</dt><dd><tt>Stop&nbsp;the&nbsp;current&nbsp;scan&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="PortScannerAsync-wait"><strong>wait</strong></a>(self, timeout<font color="#909090">=None</font>)</dt><dd><tt>Wait&nbsp;for&nbsp;the&nbsp;current&nbsp;scan&nbsp;process&nbsp;to&nbsp;finish,&nbsp;or&nbsp;timeout</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PortScannerError">class <strong>PortScannerError</strong></a>(<a href="builtins.html#Exception">builtins.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="builtins.html#Exception">Exception</a>&nbsp;error&nbsp;class&nbsp;for&nbsp;<a href="#PortScanner">PortScanner</a>&nbsp;class<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="nmap.html#PortScannerError">PortScannerError</a></dd>
+<dd><a href="builtins.html#Exception">builtins.Exception</a></dd>
+<dd><a href="builtins.html#BaseException">builtins.BaseException</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PortScannerError-__init__"><strong>__init__</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="PortScannerError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="builtins.html#Exception">builtins.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#PortScannerError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="builtins.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><a name="PortScannerError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PortScannerError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PortScannerError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PortScannerError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="PortScannerError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="PortScannerError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PortScannerError-with_traceback"><strong>with_traceback</strong></a>(...)</dt><dd><tt><a href="builtins.html#Exception">Exception</a>.<a href="#PortScannerError-with_traceback">with_traceback</a>(tb)&nbsp;--<br>
+set&nbsp;self.<strong>__traceback__</strong>&nbsp;to&nbsp;tb&nbsp;and&nbsp;return&nbsp;self.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><strong>__cause__</strong></dt>
+<dd><tt>exception&nbsp;cause</tt></dd>
+</dl>
+<dl><dt><strong>__context__</strong></dt>
+<dd><tt>exception&nbsp;context</tt></dd>
+</dl>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>__traceback__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PortScannerHostDict">class <strong>PortScannerHostDict</strong></a>(<a href="builtins.html#dict">builtins.dict</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Special&nbsp;dictionnary&nbsp;class&nbsp;for&nbsp;storing&nbsp;and&nbsp;accessing&nbsp;host&nbsp;scan&nbsp;result<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="nmap.html#PortScannerHostDict">PortScannerHostDict</a></dd>
+<dd><a href="builtins.html#dict">builtins.dict</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PortScannerHostDict-all_ip"><strong>all_ip</strong></a>(self)</dt><dd><tt>returns&nbsp;list&nbsp;of&nbsp;ip&nbsp;ports</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-all_protocols"><strong>all_protocols</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;scanned&nbsp;protocols</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-all_sctp"><strong>all_sctp</strong></a>(self)</dt><dd><tt>returns&nbsp;list&nbsp;of&nbsp;sctp&nbsp;ports</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-all_tcp"><strong>all_tcp</strong></a>(self)</dt><dd><tt>returns&nbsp;list&nbsp;of&nbsp;tcp&nbsp;ports</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-all_udp"><strong>all_udp</strong></a>(self)</dt><dd><tt>returns&nbsp;list&nbsp;of&nbsp;udp&nbsp;ports</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-has_ip"><strong>has_ip</strong></a>(self, port)</dt><dd><tt>returns&nbsp;True&nbsp;if&nbsp;ip&nbsp;port&nbsp;has&nbsp;info,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-has_sctp"><strong>has_sctp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;True&nbsp;if&nbsp;sctp&nbsp;port&nbsp;has&nbsp;info,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-has_tcp"><strong>has_tcp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;True&nbsp;if&nbsp;tcp&nbsp;port&nbsp;has&nbsp;info,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-has_udp"><strong>has_udp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;True&nbsp;if&nbsp;udp&nbsp;port&nbsp;has&nbsp;info,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-hostname"><strong>hostname</strong></a>(self)</dt><dd><tt>returns&nbsp;hostname</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-ip"><strong>ip</strong></a>(self, port)</dt><dd><tt>returns&nbsp;info&nbsp;for&nbsp;ip&nbsp;port</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-sctp"><strong>sctp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;info&nbsp;for&nbsp;sctp&nbsp;port</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-state"><strong>state</strong></a>(self)</dt><dd><tt>returns&nbsp;host&nbsp;state</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-tcp"><strong>tcp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;info&nbsp;for&nbsp;tpc&nbsp;port</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-udp"><strong>udp</strong></a>(self, port)</dt><dd><tt>returns&nbsp;info&nbsp;for&nbsp;udp&nbsp;port</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="builtins.html#dict">builtins.dict</a>:<br>
+<dl><dt><a name="PortScannerHostDict-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(type(x))&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__len__"><strong>__len__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__len__">__len__</a>()&nbsp;&lt;==&gt;&nbsp;len(x)</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PortScannerHostDict-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-fromkeys"><strong>fromkeys</strong></a>(...)</dt><dd><tt><a href="builtins.html#dict">dict</a>.<a href="#PortScannerHostDict-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;<a href="builtins.html#dict">dict</a>&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
+v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-items">items</a>()&nbsp;-&gt;&nbsp;a&nbsp;set-like&nbsp;<a href="builtins.html#object">object</a>&nbsp;providing&nbsp;a&nbsp;view&nbsp;on&nbsp;D's&nbsp;items</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-keys">keys</a>()&nbsp;-&gt;&nbsp;a&nbsp;set-like&nbsp;<a href="builtins.html#object">object</a>&nbsp;providing&nbsp;a&nbsp;view&nbsp;on&nbsp;D's&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
+If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
+2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#PortScannerHostDict-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-update">update</a>([E,&nbsp;]**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;<a href="builtins.html#dict">dict</a>/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
+If&nbsp;E&nbsp;present&nbsp;and&nbsp;has&nbsp;a&nbsp;.<a href="#PortScannerHostDict-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
+If&nbsp;E&nbsp;present&nbsp;and&nbsp;lacks&nbsp;.<a href="#PortScannerHostDict-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
+In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
+
+<dl><dt><a name="PortScannerHostDict-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#PortScannerHostDict-values">values</a>()&nbsp;-&gt;&nbsp;an&nbsp;<a href="builtins.html#object">object</a>&nbsp;providing&nbsp;a&nbsp;view&nbsp;on&nbsp;D's&nbsp;values</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="builtins.html#dict">builtins.dict</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#PortScannerHostDict-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="builtins.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__last_modification__</strong> = '2011.11.09'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Alexandre&nbsp;Norman&nbsp;(norman@xael.org)</td></tr></table>
+</body></html>
