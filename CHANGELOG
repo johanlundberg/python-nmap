@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2012/12/13 (v0.2.6)
+ - patch from lundberg.johan
+ - bug correction : when nmap doesn't work displays stderr instead of stdout
+
 2012/11/23 (v0.2.5)
  - corrected : Issue 2: "map.nmap.PortScannerError: 'nmap program was not found in path'" on CentOS
  - corrected : Issue 3: nmap.scan() short-circuits prematurely

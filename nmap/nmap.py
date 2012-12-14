@@ -7,6 +7,8 @@ nmap.py - version and date, see below
 Author : Alexandre Norman - norman at xael.org
 Contributors: Steve 'Ashcrow' Milner - steve at gnulinux.net
               Brian Bustin - brian at bustin.us
+              old.schepperhand
+              Johan Lundberg 
 Licence : GPL v3 or any later version
 
 
@@ -84,8 +86,8 @@ True
 
 
 __author__ = 'Alexandre Norman (norman@xael.org)'
-__version__ = '0.2.5'
-__last_modification__ = '2012.11.23'
+__version__ = '0.2.6'
+__last_modification__ = '2012.12.13'
 
 
 import os
@@ -281,7 +283,10 @@ class PortScanner(object):
         try:
             dom = xml.dom.minidom.parseString(self._nmap_last_output)
         except xml.parsers.expat.ExpatError:
-            raise PortScannerError(self._nmap_last_output)
+            if len(nmap_err)>0:
+                raise PortScannerError(nmap_err)
+            else:
+                raise PortScannerError(self._nmap_last_output)
 
         # nmap command line
         scan_result['nmap'] = {
@@ -815,3 +820,4 @@ if __name__ == '__main__':
 
 
 #<EOF>######################################################################
+
