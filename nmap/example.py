@@ -122,9 +122,9 @@ if (os.getuid() == 0):
 
     if nm['127.0.0.1'].has_key('osmatch'):
         for osmatch in nm['127.0.0.1']['osmatch']:
-            print('OsMatch.name : {0}'.format(osclass['name']))
-            print('OsMatch.accuracy : {0}'.format(osclass['accuracy']))
-            print('OsMatch.line : {0}'.format(osclass['line']))
+            print('osmatch.name : {0}'.format(osmatch['name']))
+            print('osmatch.accuracy : {0}'.format(osmatch['accuracy']))
+            print('osmatch.line : {0}'.format(osmatch['line']))
             print('')
 
     if nm['127.0.0.1'].has_key('fingerprint'):
